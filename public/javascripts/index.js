@@ -28,7 +28,7 @@ function RenderImage(imageUrl){
           
        }	
   };
-  function loadPopup()
+  function loadTextractPopup()
   {
     if(!textractJson.Blocks)
     {
@@ -42,6 +42,27 @@ function RenderImage(imageUrl){
             content.push(
               "<span>",
               item.Text,
+              "</span>",
+              "&nbsp;&nbsp;"
+            );           
+            }
+        });
+    $("#popup-text").html(content.join(""));      
+  };
+  function loadRekognitionPopup()
+  {
+    if(!textractJson.Blocks)
+    {
+      $("#popup-text").text("Image not uploaded.\n Please upload a valid image file");
+      return;
+    }
+    var type = $("input[name='type']:checked").val();
+    var content = ["<h2>", type[0], type.slice(1).toLowerCase(),"s", " extracted from the uploaded image</h2>"];    
+    $.each( textractJson.Blocks, function( i, item ) {
+          if ( item.Type.Value === type) {
+            content.push(
+              "<span>",
+              item.DetectedText,
               "</span>",
               "&nbsp;&nbsp;"
             );           

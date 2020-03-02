@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  form(action='/', method='POST', enctype="multipart/form-data")
+  form(action='/beta', method='POST', enctype="multipart/form-data")
     h2 Pictext - Developer friendly online OCR.
     table
       tr
@@ -42,11 +42,10 @@ block content
           label(for="word")  WORDS          
           input(type="radio" id="line" name="type" text="LINE" value="LINE" checked)
           label(for="line")  LINES
-          a(href="javascript:void(0)" onclick="loadTextractPopup();toggle_visibility('contact-popup');" style="float: right") Show Full Text
+          a(href="javascript:void(0)" onclick="loadRekognitionPopup();toggle_visibility('contact-popup');" style="float: right") Show Full Text
       tr
         td 
-          a(href="/beta"  style="float: right") Try Beta
-          span(style="float: right") Not feeling lucky? 
+          a(href="/"  style="float: right") Back to pictext
       div(class="popup-position" id="contact-popup")
         div(class="popup-wrapper")
           div(id="popup-container" name="popup-container")
@@ -71,8 +70,8 @@ block content
       var relTop = relY/imageY;
       var type = $("input[name='type']:checked").val();
       $.each( textractJson.Blocks, function( i, item ) {
-            if ( item.BlockType.Value === type && relLeft > item.Geometry.BoundingBox.Left && relTop > item.Geometry.BoundingBox.Top && relLeft < item.Geometry.BoundingBox.Left + item.Geometry.BoundingBox.Width && relTop < item.Geometry.BoundingBox.Top + item.Geometry.BoundingBox.Height ) {
-              $("#textract").val(item.Text).select();
+            if ( item.Type.Value === type && relLeft > item.Geometry.BoundingBox.Left && relTop > item.Geometry.BoundingBox.Top && relLeft < item.Geometry.BoundingBox.Left + item.Geometry.BoundingBox.Width && relTop < item.Geometry.BoundingBox.Top + item.Geometry.BoundingBox.Height ) {
+              $("#textract").val(item.DetectedText).select();
                document.execCommand("copy");
                 return false;
               }
