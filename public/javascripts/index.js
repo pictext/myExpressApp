@@ -58,7 +58,7 @@ function RenderImage(imageUrl){
     }
     var type = $("input[name='type']:checked").val();
     var content = ["<h2>", type[0], type.slice(1).toLowerCase(),"s", " extracted from the uploaded image</h2>"];    
-    $.each( textractJson.Blocks, function( i, item ) {
+    $.each( textractJson.Blocks, function( i, item ) {          
           if ( item.Type.Value === type) {
             content.push(
               "<span>",
@@ -78,15 +78,24 @@ function RenderImage(imageUrl){
           e.style.display = 'block';
   };
   Filevalidation = () => { 
-    const fi = document.getElementById('fileUpload'); 
+    const fileLocal = document.getElementById('fileUpload'); 
     // Check if any file is selected. 
-    if (fi.files.length == 1) {
-      const fsize = fi.files.item(0).size; 
+    if (fileLocal.files.length == 1) {
+      const fsize = fileLocal.files.item(0).size; 
       const file = Math.round((fsize / 1024)); 
       // The size of the file. 
       if (file >= 2048) { 
           alert("File too Big, please select a file less than 2MB");
           return false;
       }
-    } 
+    }
+    const fileUrl = document.getElementById('file');
+    if(fileLocal.files.length == 1 || fileUrl.value.length > 0)
+    { 
+      var upload = document.getElementById('upload');
+      if(upload)
+      {
+        upload.removeAttribute("disabled");
+      }
+    }   
 }; 

@@ -6,7 +6,7 @@ var aws = require('aws-sdk')
 var multer = require('multer')
 var multerS3 = require('multer-s3')
 var s3 = new aws.S3({ /* ... */ })
-var textractApi = 'TextractPSScript API URL'
+var textractApi = ''
 var upload = multer({
   storage: multerS3({
     s3: s3,
