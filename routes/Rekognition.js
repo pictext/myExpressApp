@@ -6,7 +6,7 @@ var aws = require('aws-sdk')
 var multer = require('multer')
 var multerS3 = require('multer-s3')
 var s3 = new aws.S3({ /* ... */ })
-var rekognitionApi = ''
+var rekognitionApi = 'https://l30op9e8x9.execute-api.us-east-1.amazonaws.com/textract-dev/RekognitionPSScript'
 var upload = multer({
   storage: multerS3({
     s3: s3,

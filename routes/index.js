@@ -6,7 +6,7 @@ var aws = require('aws-sdk')
 var multer = require('multer')
 var multerS3 = require('multer-s3')
 var s3 = new aws.S3({ /* ... */ })
-var textractApi = ''
+var textractApi = 'https://l30op9e8x9.execute-api.us-east-1.amazonaws.com/textract-dev/TextractPSScript'
 var upload = multer({
   storage: multerS3({
     s3: s3,
@@ -22,15 +22,18 @@ var upload = multer({
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Pictext', imageurl: '', textractJson: '{DocumentMetadata: {Pages: 1}}'});
+  if(req.query.file)
+  {
+    postByUrl(req, res, next);
+  }
+  else
+  {
+    res.render('index', { title: 'Pictext', imageurl: '', textractJson: '{DocumentMetadata: {Pages: 1}}'});
+  }
 });
 
 router.post('/', upload.single('fileUpload'), function(req, res, next) {
-  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
-  req.connection.remoteAddress || 
-  req.socket.remoteAddress || 
-  req.connection.socket.remoteAddress;
-  console.log(ip);
+  writeIP(req);
 
   if(req.file)
   {
@@ -52,8 +55,27 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
         textract.Blocks = body;
         res.render('index', { title: 'Pictext', textractJson: JSON.stringify(textract), imageurl: s3url});
         });
-  } else {
+  }
+  else
+  {
+    postByUrl(req,res, next);
+  }
+});
+var writeIP = (req) =>
+{
+  var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() || 
+  req.connection.remoteAddress || 
+  req.socket.remoteAddress || 
+  req.connection.socket.remoteAddress;
+  console.log(ip);
+};
+var postByUrl = (req, res, naext) =>
+{
     var imageurl = req.body.file;
+    if(!imageurl && req.query.file)
+    {
+      imageurl = req.query.file;
+    }
     request.head(imageurl,{rejectUnauthorized: false}, (error, response, body) => {
       if (error) {
         console.error(error)
@@ -84,7 +106,6 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
             });
       }
     });  
-  }
-});
+};
 
 module.exports = router;
