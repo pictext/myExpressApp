@@ -10,9 +10,11 @@ function RenderImage(imageUrl){
         var img = document.createElement('img');
         var loaded = false, wait;
 
-	 	img.addEventListener('load', function () { loaded = true; }, true);
-
-	 	wait = setInterval(function () {
+        img.addEventListener('load', loadComplete, true);
+        function loadComplete(){
+          loaded = true;
+        }
+	 	    wait = setInterval(function () {
      			if(loaded) 
                     { clearInterval(wait);}
                 imageX = img.width;
@@ -25,57 +27,52 @@ function RenderImage(imageUrl){
             invoice.removeChild(invoice.childNodes[0]);
         }
         invoice.appendChild(img);
-          
+        img.removeEventListener('load', loadComplete, true);
+        if(textractJson.Blocks[0].BlockType)
+        {
+          img.addEventListener("load", loadTextractPopup);
+        }
+        else
+        {
+          img.addEventListener("load", loadRekognitionPopup);
+        }
+        document.getElementById('tblContent').style.display = 'block';        
        }	
   };
   function loadTextractPopup()
   {
     if(!textractJson.Blocks)
     {
-      $("#popup-text").text("Image not uploaded.\n Please upload a valid image file");
+      alert("Unable to locate english text in the uploaded image.");
       return;
     }
-    var type = $("input[name='type']:checked").val();
-    var content = ["<h2>", type[0], type.slice(1).toLowerCase(),"s", " extracted from the uploaded image</h2>"];    
+    var type = $("input[name='type']:checked").val(); 
+    var content = [];
+    const seperator = (type == 'LINE')? '\n' : '\0';   
     $.each( textractJson.Blocks, function( i, item ) {
           if ( item.BlockType.Value === type) {
-            content.push(
-              "<span>",
-              item.Text,
-              "</span>",
-              "&nbsp;&nbsp;"
-            );           
+            content.push(item.Text);           
             }
         });
-    $("#popup-text").html(content.join(""));      
+    //$("#popup-text").html(content.join(seperator));
+    $("#textract").val(content.join(seperator));      
   };
   function loadRekognitionPopup()
   {
     if(!textractJson.Blocks)
     {
-      $("#popup-text").text("Image not uploaded.\n Please upload a valid image file");
+      alert("Unable to locate english text in the uploaded image.");
       return;
     }
     var type = $("input[name='type']:checked").val();
-    var content = ["<h2>", type[0], type.slice(1).toLowerCase(),"s", " extracted from the uploaded image</h2>"];    
+    var content = [];
+    const seperator = (type == 'LINE')? '\n' : '\0'; 
     $.each( textractJson.Blocks, function( i, item ) {          
           if ( item.Type.Value === type) {
-            content.push(
-              "<span>",
-              item.DetectedText,
-              "</span>",
-              "&nbsp;&nbsp;"
-            );           
+            content.push(item.DetectedText);           
             }
         });
-    $("#popup-text").html(content.join(""));      
-  };
-  function toggle_visibility(id){              
-      var e = document.getElementById(id);
-      if(e.style.display == 'block')
-          e.style.display = 'none';
-      else 
-          e.style.display = 'block';
+      $("#textract").val(content.join(seperator));      
   };
   Filevalidation = () => { 
     const fileLocal = document.getElementById('fileUpload'); 
@@ -85,17 +82,15 @@ function RenderImage(imageUrl){
       const file = Math.round((fsize / 1024)); 
       // The size of the file. 
       if (file >= 2048) { 
-          alert("File too Big, please select a file less than 2MB");
+          alert("File too big, please select a file with less than 2MB size");
           return false;
       }
     }
-    const fileUrl = document.getElementById('file');
-    if(fileLocal.files.length == 1 || fileUrl.value.length > 0)
-    { 
-      var upload = document.getElementById('upload');
-      if(upload)
-      {
-        upload.removeAttribute("disabled");
-      }
-    }   
-}; 
+};
+function resetText(){
+  $("#textract").val('');
+} 
+function copyText(){
+  $("#textract").select();
+  document.execCommand("copy");
+}

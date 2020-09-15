@@ -4,15 +4,10 @@ block content
   form(action='/', method='POST', enctype="multipart/form-data")
     table
       tr
-        td(valign="top")
-          h2 Pictext - Developer friendly online OCR.
-          table
+        td(valign="top")  
+          table(style="padding: 15px;")
             tr
-              td 
-                b Step 1:
-                span  Choose an image file from your machine/device and click on "Upload" button:
-            tr
-              td  
+              td
                 input(type="file", name="fileUpload", id="fileUpload", onchange="Filevalidation()", accept="image/*")
             tr
               td
@@ -31,41 +26,42 @@ block content
                         .error= msg
             tr
               td(style="vertical-align: middle")
-                input(type="submit", value="Upload" id="upload" onclick="return Filevalidation()" style="float: right" disabled)
+                input(type="submit", value="Upload" id="upload" onclick="return Filevalidation()" style="float: right")
+          table(id="tblContent" style="display:none; padding: 15px;")
             tr
               td
-                b Step 2:
-                span  Click anywhere on the image displayed below to view the text:
+                input(type="button", value="Clear Text" onclick="resetText()")
+                input(type="button", value="Copy To Clipboard" onclick="copyText()" style="float: right")
             tr
               td
-                input(type="text", name='textract', id='textract' size='80') 
+                em (Clear text and click anywhere on the image to view text from the clicked word/line region)
+            tr
+              td
+                textarea( name='textract', id='textract' rows='20' cols='62')
             tr
               td          
                 input(type="radio" id="word" name="type" text="WORD" value="WORD")
                 label(for="word")  WORDS          
                 input(type="radio" id="line" name="type" text="LINE" value="LINE" checked)
                 label(for="line")  LINES
-                a(href="javascript:void(0)" onclick="loadTextractPopup();toggle_visibility('contact-popup');" style="float: right") Show Full Text
+                a(href="javascript:void(0)" onclick="loadTextractPopup()" style="float: right") Show Full Text
             tr
-              td 
+              td
                 a(href="/beta"  style="float: right") Try Beta
-                span(style="float: right") Not feeling lucky? 
-            div(class="popup-position" id="contact-popup")
-              div(class="popup-wrapper")
-                div(id="popup-container" name="popup-container")
-                  div(class="modal-footer")              
-                    p
-                      a(herf="javascript:void(0)" onclick="toggle_visibility('contact-popup');"  style="float: right") Close Popup
-                  div(id="popup-text" name="popup-text")            
+                span(style="float: right") Not feeling lucky?  
+            tr
+              td
+                input(type="text", id="buffer")    
         td
           div(id='invoice')    
     script(src="/javascripts/index.js")
     script(language="javascript").
       var textractJson =  !{textractJson};
-      document.getElementById("invoice").onclick = function(e){
+      document.getElementById("invoice").addEventListener("click", afterUpload);
+      function afterUpload(e){
       if(!textractJson.Blocks)
       {
-        alert("No text found in this region.\n Please upload a valid image file");
+        alert("Unable to locate english text in the uploaded image");
         return;
       }
       var offset = $("#invoice").offset();
@@ -74,12 +70,20 @@ block content
       var relLeft = relX/imageX;
       var relTop = relY/imageY;
       var type = $("input[name='type']:checked").val();
+      const seperator = (type == 'LINE')? '\n' : '\0';
+
       $.each( textractJson.Blocks, function( i, item ) {
             if ( item.BlockType.Value === type && relLeft > item.Geometry.BoundingBox.Left && relTop > item.Geometry.BoundingBox.Top && relLeft < item.Geometry.BoundingBox.Left + item.Geometry.BoundingBox.Width && relTop < item.Geometry.BoundingBox.Top + item.Geometry.BoundingBox.Height ) {
-              $("#textract").val(item.Text).select();
-               document.execCommand("copy");
+                var content = ($("#textract").val().length > 0) ? $("#textract").val() + seperator : '';
+                $("#textract").val(content + item.Text);
+                try
+                {
+                  $("#buffer").val(item.Text).select();
+                  document.execCommand("copy");
+                }
+                finally{}
                 return false;
               }
           });
-      };  
+      }  
       RenderImage("#{imageurl}");

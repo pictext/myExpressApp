@@ -5,8 +5,16 @@ var router = express.Router();
 var aws = require('aws-sdk')
 var multer = require('multer')
 var multerS3 = require('multer-s3')
+var lawgs = require('lawgs');
+
+lawgs.config({
+	aws: {
+		region: 'us-east-1' /* Required */
+	}
+});
+var logger  = lawgs.getOrCreate('/aws/elasticbeanstalk/myExpressApp');
 var s3 = new aws.S3({ /* ... */ })
-var rekognitionApi = 'https://l30op9e8x9.execute-api.us-east-1.amazonaws.com/textract-dev/RekognitionPSScript'
+var rekognitionApi = '{Lambda API URL}'
 var upload = multer({
   storage: multerS3({
     s3: s3,
@@ -30,11 +38,11 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
   req.connection.remoteAddress || 
   req.socket.remoteAddress || 
   req.connection.socket.remoteAddress;
-  console.log(ip);
+  logger.log('sendersip',ip);
 
   if(req.file)
   {
-    console.log(req.file);
+    logger.log('file',req.file);
     var s3key = req.file.key;
     var s3url = req.file.location;
     var headersOpt = {  
@@ -45,7 +53,7 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
       json: {url: '', bucketname: 'textracter', s3key: s3key}
     }, (error, response, body) => {
         if (error) {
-          console.error(error)
+          logger.log('rekognitionApiError',error)
           return
         }
         var textract = {DocumentMetadata: {Pages: 1},Blocks: []};
@@ -56,10 +64,10 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
     var imageurl = req.body.file;
     request.head(imageurl,{rejectUnauthorized: false}, (error, response, body) => {
       if (error) {
-        console.error(error)
+        logger.error('error',error)
         return
       }
-      console.log(response.headers);
+      logger.log('responseHeaders',response.headers);
       if(response.headers['content-length']>2097152 || !response.headers['content-type'].startsWith('image'))
       {
         req.flash('error', "Either the file size is more than 2 MB or the file is not a valid image file.");
@@ -75,7 +83,7 @@ router.post('/', upload.single('fileUpload'), function(req, res, next) {
           json: {url: imageurl, bucketname: 'textracter', s3key: ''}
         }, (error, response, body) => {
             if (error) {
-              console.error(error)
+              logger.log('error',error)
               return
             }
             var textract = {DocumentMetadata: {Pages: 1},Blocks: []};
