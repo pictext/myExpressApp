@@ -9,4 +9,5 @@ There are three ways an image with english content can be posted to Pictext.app
 3) Submit publicly accessible URL of a image from UI.
 
 Pictext app can be added as context menu option on chrome.
-Download PictextApp-as-chrome-extension.docx" from Downloads folder and follow the instructions to set Pictext app as context menu option.
+<br>
+Download "PictextApp-as-chrome-extension.docx" from downloads folder and follow the instructions given in the document to set Pictext app as context menu option.
