@@ -1,6 +1,5 @@
 # myExpressApp 
-This is frontend application of https://pictext.app
-<strong>Pictext.app is web based online OCR powered by AWS textract and rekognition.</strong>
+<strong>https://pictext.app is web based online OCR powered by AWS textract and rekognition.</strong>
 This is a developer friendly, ad free online tool.
 
 There are three ways an image with english content can be posted to Pictext.app
